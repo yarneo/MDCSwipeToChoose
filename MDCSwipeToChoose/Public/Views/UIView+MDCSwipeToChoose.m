@@ -39,7 +39,6 @@ const void * const MDCViewStateKey = &MDCViewStateKey;
     self.mdc_options = options ? options : [MDCSwipeOptions new];
     self.mdc_viewState = [MDCViewState new];
     self.mdc_viewState.originalCenter = self.center;
-    self.mdc_viewState.originalTransform = self.layer.transform;
 
     [self mdc_setupPanGestureRecognizer];
 }
@@ -115,8 +114,9 @@ const void * const MDCViewStateKey = &MDCViewStateKey;
 - (void)mdc_finalizePosition {
     MDCSwipeDirection direction = [self mdc_directionOfExceededThreshold];
     switch (direction) {
-        case MDCSwipeDirectionRight:
-        case MDCSwipeDirectionLeft: {
+//        case MDCSwipeDirectionRight:
+        case MDCSwipeDirectionLeft:
+        case MDCSwipeDirectionUp: {
             CGPoint translation = MDCCGPointSubtract(self.center,
                                                      self.mdc_viewState.originalCenter);
             [self mdc_exitSuperviewFromTranslation:translation];
@@ -134,7 +134,7 @@ const void * const MDCViewStateKey = &MDCViewStateKey;
                           delay:0.0
                         options:self.mdc_options.swipeCancelledAnimationOptions
                      animations:^{
-                         self.layer.transform = self.mdc_viewState.originalTransform;
+                         self.transform = self.mdc_viewState.originalTransform;
                          self.center = self.mdc_viewState.originalCenter;
                      } completion:^(BOOL finished) {
                          id<MDCSwipeToChooseDelegate> delegate = self.mdc_options.delegate;
@@ -150,10 +150,6 @@ const void * const MDCViewStateKey = &MDCViewStateKey;
     if ([delegate respondsToSelector:@selector(view:shouldBeChosenWithDirection:)]) {
         BOOL should = [delegate view:self shouldBeChosenWithDirection:direction];
         if (!should) {
-            [self mdc_returnToOriginalCenter];
-            if (self.mdc_options.onCancel != nil){
-                self.mdc_options.onCancel(self);
-            }
             return;
         }
     }
@@ -172,19 +168,26 @@ const void * const MDCViewStateKey = &MDCViewStateKey;
 
 - (void)mdc_executeOnPanBlockForTranslation:(CGPoint)translation {
     if (self.mdc_options.onPan) {
-        CGFloat thresholdRatio = MIN(1.f, fabs(translation.x)/self.mdc_options.threshold);
+//        NSLog(@"%f, %f, %f, %f",self.frame.origin.x,self.frame.origin.y,self.frame.size.width,self.frame.size.height);
+        CGFloat thresholdRatioX = MIN(1.f, fabs(translation.x)/self.mdc_options.threshold);
+        CGFloat thresholdRatioY = MIN(1.f, fabs(translation.y)/self.mdc_options.threshold);
 
         MDCSwipeDirection direction = MDCSwipeDirectionNone;
-        if (translation.x > 0.f) {
-            direction = MDCSwipeDirectionRight;
-        } else if (translation.x < 0.f) {
+//        if (translation.x > 0.f) {
+//            direction = MDCSwipeDirectionRight;
+        /*} else */if (translation.x < 0.f && fabs(translation.x) > fabs(translation.y) ) {
             direction = MDCSwipeDirectionLeft;
+        } else if (translation.y < 0.f) {
+            direction = MDCSwipeDirectionUp;
         }
 
         MDCPanState *state = [MDCPanState new];
         state.view = self;
         state.direction = direction;
-        state.thresholdRatio = thresholdRatio;
+        state.thresholdRatio = thresholdRatioX;
+        if (direction == MDCSwipeDirectionUp) {
+            state.thresholdRatio = thresholdRatioY;
+        }
         self.mdc_options.onPan(state);
     }
 }
@@ -194,7 +197,8 @@ const void * const MDCViewStateKey = &MDCViewStateKey;
 - (void)mdc_rotateForTranslation:(CGPoint)translation
                rotationDirection:(MDCRotationDirection)rotationDirection {
     CGFloat rotation = MDCDegreesToRadians(translation.x/100 * self.mdc_options.rotationFactor);
-    self.layer.transform = CATransform3DMakeRotation(rotationDirection * rotation, 0.0, 0.0, 1.0);
+    self.transform = CGAffineTransformRotate(self.mdc_viewState.originalTransform,
+                                             rotationDirection * rotation);
 }
 
 #pragma mark Threshold
@@ -207,8 +211,10 @@ const void * const MDCViewStateKey = &MDCViewStateKey;
     switch (direction) {
         case MDCSwipeDirectionLeft:
             return CGPointMake(-offset, 0);
-        case MDCSwipeDirectionRight:
-            return CGPointMake(offset, 0);
+//        case MDCSwipeDirectionRight:
+//            return CGPointMake(offset, 0);
+        case MDCSwipeDirectionUp:
+            return CGPointMake(0, -offset);
         default:
             [NSException raise:NSInternalInconsistencyException
                         format:@"Invallid direction argument."];
@@ -217,10 +223,12 @@ const void * const MDCViewStateKey = &MDCViewStateKey;
 }
 
 - (MDCSwipeDirection)mdc_directionOfExceededThreshold {
-    if (self.center.x > self.mdc_viewState.originalCenter.x + self.mdc_options.threshold) {
+    /*if (self.center.x > self.mdc_viewState.originalCenter.x + self.mdc_options.threshold) {
         return MDCSwipeDirectionRight;
-    } else if (self.center.x < self.mdc_viewState.originalCenter.x - self.mdc_options.threshold) {
+    } else*/ if (self.center.x < self.mdc_viewState.originalCenter.x - self.mdc_options.threshold && ( (self.mdc_viewState.originalCenter.x - self.center.x) > (self.mdc_viewState.originalCenter.y - self.center.y)) ) {
         return MDCSwipeDirectionLeft;
+    } else if (self.center.y < self.mdc_viewState.originalCenter.y - self.mdc_options.threshold) {
+        return MDCSwipeDirectionUp;
     } else {
         return MDCSwipeDirectionNone;
     }
@@ -233,7 +241,7 @@ const void * const MDCViewStateKey = &MDCViewStateKey;
 
     if (panGestureRecognizer.state == UIGestureRecognizerStateBegan) {
         self.mdc_viewState.originalCenter = view.center;
-        self.mdc_viewState.originalTransform = view.layer.transform;
+        self.mdc_viewState.originalTransform = view.transform;
 
         // If the pan gesture originated at the top half of the view, rotate the view
         // away from the center. Otherwise, rotate towards the center.
