@@ -33,6 +33,7 @@ class ChoosePersonViewController: UIViewController, MDCSwipeToChooseDelegate {
     var currentPerson:Person!
     var frontCardView:ChoosePersonView!
     var backCardView:ChoosePersonView!
+    var backestCardView:ChoosePersonView!
     
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -43,27 +44,29 @@ class ChoosePersonViewController: UIViewController, MDCSwipeToChooseDelegate {
         self.people = defaultPeople()
         // Here you can init your properties
     }
-    override init(){
-        super.init()
-    }
+    
     override func viewDidLoad(){
         super.viewDidLoad()
         
         // Display the first ChoosePersonView in front. Users can swipe to indicate
         // whether they like or dislike the person displayed.
-        self.setFrontCardView(self.popPersonViewWithFrame(frontCardViewFrame())!)
+        self.setFrontCardViewFunc(self.popPersonViewWithFrame(frontCardViewFrame())!)
         self.view.addSubview(self.frontCardView)
         
         // Display the second ChoosePersonView in back. This view controller uses
         // the MDCSwipeToChooseDelegate protocol methods to update the front and
         // back views after each user swipe.
+
         self.backCardView = self.popPersonViewWithFrame(backCardViewFrame())!
         self.view.insertSubview(self.backCardView, belowSubview: self.frontCardView)
         
+        self.backestCardView = self.popPersonViewWithFrame(backestCardViewFrame())!
+        self.view.insertSubview(self.backestCardView, belowSubview: self.backCardView)
+        
         // Add buttons to programmatically swipe the view left or right.
         // See the `nopeFrontCardView` and `likeFrontCardView` methods.
-        constructNopeButton()
-        constructLikedButton()
+//        constructNopeButton()
+//        constructLikedButton()
     }
     func suportedInterfaceOrientations() -> UIInterfaceOrientationMask{
         return UIInterfaceOrientationMask.Portrait
@@ -94,10 +97,14 @@ class ChoosePersonViewController: UIViewController, MDCSwipeToChooseDelegate {
         // MDCSwipeOptions class). Since the front card view is gone, we
         // move the back card to the front, and create a new back card.
         if(self.backCardView != nil){
-            self.setFrontCardView(self.backCardView)
+            self.setFrontCardViewFunc(self.backCardView)
+        }
+        if (self.backestCardView != nil) {
+            self.setBackCardViewFunc(self.backestCardView)
         }
         
         backCardView = self.popPersonViewWithFrame(self.backCardViewFrame())
+        backestCardView = self.popPersonViewWithFrame(self.backestCardViewFrame())
         //if(true){
         // Fade the back card into view.
         if(backCardView != nil){
@@ -107,8 +114,15 @@ class ChoosePersonViewController: UIViewController, MDCSwipeToChooseDelegate {
                 self.backCardView.alpha = 1.0
                 },completion:nil)
         }
+        if(backestCardView != nil){
+            self.backestCardView.alpha = 0.0
+            self.view.insertSubview(self.backestCardView, belowSubview: self.backCardView)
+            UIView.animateWithDuration(0.5, delay: 0.0, options: .CurveEaseInOut, animations: {
+                self.backestCardView.alpha = 1.0
+                },completion:nil)
+        }
     }
-    func setFrontCardView(frontCardView:ChoosePersonView) -> Void{
+    func setFrontCardViewFunc(frontCardView:ChoosePersonView) -> Void{
         
         // Keep track of the person currently being chosen.
         // Quick and dirty, just for the purposes of this sample app.
@@ -116,11 +130,15 @@ class ChoosePersonViewController: UIViewController, MDCSwipeToChooseDelegate {
         self.currentPerson = frontCardView.person
     }
     
+    func setBackCardViewFunc(backCardView:ChoosePersonView) -> Void{
+        self.backCardView = backCardView
+    }
+    
     func defaultPeople() -> [Person]{
         // It would be trivial to download these from a web service
         // as needed, but for the purposes of this sample app we'll
         // simply store them in memory.
-        return [Person(name: "Finn", image: UIImage(named: "finn"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5), Person(name: "Jake", image: UIImage(named: "jake"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5), Person(name: "Fiona", image: UIImage(named: "fiona"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5), Person(name: "P.Gumball", image: UIImage(named: "prince"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5)]
+        return [Person(name: "Finn", image: UIImage(named: "finn"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5), Person(name: "Jake", image: UIImage(named: "jake"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5), Person(name: "Fiona", image: UIImage(named: "fiona"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5), Person(name: "P.Gumball", image: UIImage(named: "prince"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5),Person(name: "P.Gumball", image: UIImage(named: "prince"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5),Person(name: "P.Gumball", image: UIImage(named: "prince"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5),Person(name: "P.Gumball", image: UIImage(named: "prince"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5),Person(name: "P.Gumball", image: UIImage(named: "prince"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5),Person(name: "P.Gumball", image: UIImage(named: "prince"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5),Person(name: "P.Gumball", image: UIImage(named: "prince"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5),Person(name: "P.Gumball", image: UIImage(named: "prince"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5),Person(name: "P.Gumball", image: UIImage(named: "prince"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5),Person(name: "P.Gumball", image: UIImage(named: "prince"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5),Person(name: "P.Gumball", image: UIImage(named: "prince"), age: 21, sharedFriends: 3, sharedInterest: 4, photos: 5)]
         
     }
     func popPersonViewWithFrame(frame:CGRect) -> ChoosePersonView?{
@@ -134,11 +152,16 @@ class ChoosePersonViewController: UIViewController, MDCSwipeToChooseDelegate {
         // based on how far the user has panned the front card view.
         var options:MDCSwipeToChooseViewOptions = MDCSwipeToChooseViewOptions()
         options.delegate = self
-        //options.threshold = 160.0
         options.onPan = { state -> Void in
             if(self.backCardView != nil){
                 var frame:CGRect = self.frontCardViewFrame()
-                self.backCardView.frame = CGRectMake(frame.origin.x, frame.origin.y-(state.thresholdRatio * 10.0), CGRectGetWidth(frame), CGRectGetHeight(frame))
+//                println(state.thresholdRatio)
+                self.backCardView.frame = CGRectMake((frame.origin.x+25)-(state.thresholdRatio * 25.0), (frame.origin.y+10)-(state.thresholdRatio * 10.0), (CGRectGetWidth(frame)-20)+(state.thresholdRatio * 20.0), (CGRectGetHeight(frame)-20)+(state.thresholdRatio * 20.0))
+            }
+            if(self.backestCardView != nil){
+                var frame:CGRect = self.frontCardViewFrame()
+//                println(state.thresholdRatio)
+                self.backestCardView.frame = CGRectMake((frame.origin.x+50)-(state.thresholdRatio * 25), (frame.origin.y+20)-(state.thresholdRatio * 10.0), (CGRectGetWidth(frame)-40)+(state.thresholdRatio * 20.0), (CGRectGetHeight(frame)-40)+(state.thresholdRatio * 20.0))
             }
         }
         
@@ -152,13 +175,17 @@ class ChoosePersonViewController: UIViewController, MDCSwipeToChooseDelegate {
     }
     func frontCardViewFrame() -> CGRect{
         var horizontalPadding:CGFloat = 20.0
-        var topPadding:CGFloat = 60.0
-        var bottomPadding:CGFloat = 200.0
-        return CGRectMake(horizontalPadding,topPadding,CGRectGetWidth(self.view.frame) - (horizontalPadding * 2), CGRectGetHeight(self.view.frame) - bottomPadding)
+        var topPadding:CGFloat = 100.0
+        var bottomPadding:CGFloat = 100.0
+        return CGRectMake(horizontalPadding,topPadding,CGRectGetWidth(self.view.frame) - (horizontalPadding * 2), CGRectGetHeight(self.view.frame) - bottomPadding - topPadding)
     }
     func backCardViewFrame() ->CGRect{
         var frontFrame:CGRect = frontCardViewFrame()
-        return CGRectMake(frontFrame.origin.x, frontFrame.origin.y + 10.0, CGRectGetWidth(frontFrame), CGRectGetHeight(frontFrame))
+        return CGRectMake(frontFrame.origin.x + 25, frontFrame.origin.y + 10, CGRectGetWidth(frontFrame)-20, CGRectGetHeight(frontFrame)-20)
+    }
+    func backestCardViewFrame() ->CGRect{
+        var frontFrame:CGRect = frontCardViewFrame()
+        return CGRectMake(frontFrame.origin.x + 50, frontFrame.origin.y + 20, CGRectGetWidth(frontFrame)-40, CGRectGetHeight(frontFrame)-40)
     }
     func constructNopeButton() -> Void{
         let button:UIButton =  UIButton.buttonWithType(UIButtonType.System) as! UIButton
@@ -184,6 +211,6 @@ class ChoosePersonViewController: UIViewController, MDCSwipeToChooseDelegate {
         self.frontCardView.mdc_swipe(MDCSwipeDirection.Left)
     }
     func likeFrontCardView() -> Void{
-        self.frontCardView.mdc_swipe(MDCSwipeDirection.Right)
+        self.frontCardView.mdc_swipe(MDCSwipeDirection.Up)
     }
 }
