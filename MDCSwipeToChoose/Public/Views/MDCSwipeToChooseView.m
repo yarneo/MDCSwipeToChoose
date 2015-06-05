@@ -46,9 +46,9 @@ static CGFloat const MDCSwipeToChooseViewLabelWidth = 65.f;
     if (self) {
         _options = options ? options : [MDCSwipeToChooseViewOptions new];
         [self setupView];
-        [self constructImageView];
-        [self constructLikedView];
-        [self constructNopeImageView];
+//        [self constructImageView];
+//        [self constructLikedView];
+//        [self constructNopeImageView];
         [self setupSwipeToChoose];
     }
     return self;
@@ -58,13 +58,7 @@ static CGFloat const MDCSwipeToChooseViewLabelWidth = 65.f;
 
 - (void)setupView {
     self.backgroundColor = [UIColor clearColor];
-    self.layer.cornerRadius = 5.f;
-    self.layer.masksToBounds = YES;
-    self.layer.borderWidth = 2.f;
-    self.layer.borderColor = [UIColor colorWith8BitRed:220.f
-                                                 green:220.f
-                                                  blue:220.f
-                                                 alpha:1.f].CGColor;
+
 }
 
 - (void)constructImageView {
@@ -83,7 +77,7 @@ static CGFloat const MDCSwipeToChooseViewLabelWidth = 65.f;
                                              color:self.options.likedColor
                                              angle:self.options.likedRotationAngle];
     self.likedView.alpha = 0.f;
-    [self.imageView addSubview:self.likedView];
+    [self addSubview:self.likedView];
 }
 
 - (void)constructNopeImageView {
